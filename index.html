@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mason Ngo Apps</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Every app Mason Ngo has built: markets, learning tools, ventures and creative work.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: hero with a live price line, three featured apps, then the shelf grouped by purpose. Each app owns a color and a drawn preview of what it does. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --fg:#11151d; --muted:#596274; --line:#dde2ea; --soft:#eef1f6; --accent:#2b55d6;
+  --mix:#11151d; --mixamt:0%;
+  --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b0e14; --surface:#131821; --fg:#e9ecf2; --muted:#949db0; --line:#252c39; --soft:#1a202b; --accent:#8ca5ff; --mix:#ffffff; --mixamt:30%; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b0e14; --surface:#131821; --fg:#e9ecf2; --muted:#949db0; --line:#252c39; --soft:#1a202b; --accent:#8ca5ff; --mix:#ffffff; --mixamt:30%; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;margin:0;-webkit-font-smoothing:antialiased}
+.band{padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.inner{max-width:1160px;margin:0 auto}
+
+/* hero */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero .inner{position:relative;padding-block:72px 52px;display:flex;flex-direction:column;gap:18px}
+.kicker{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.live{width:8px;height:8px;border-radius:50%;background:#16a37b;animation:pulse 2.4s ease-out infinite}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(44px,9vw,92px);line-height:.95;letter-spacing:-.035em;margin:0;text-wrap:balance;max-width:12ch}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{color:var(--muted);font-size:clamp(16px,2vw,18px);margin:0;max-width:54ch}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.stat{display:flex;flex-direction:column;gap:2px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb, var(--surface) 82%, transparent);backdrop-filter:blur(6px);min-width:100px;color:inherit;text-decoration:none}
+.stat b{font-family:var(--display);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+a.stat:hover{border-color:var(--accent)}
+
+/* filter bar */
+.bar{position:sticky;top:env(safe-area-inset-top, 0px);z-index:5;background:color-mix(in srgb, var(--bg) 86%, transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:10;background:var(--bg)}
+.bar .inner{display:flex;gap:8px;overflow-x:auto;padding-block:12px;scrollbar-width:none}
+.bar .inner::-webkit-scrollbar{display:none}
+.chip{flex:none;font:500 13px var(--body);color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;transition:color .2s,border-color .2s,background .2s}
+.chip:hover{color:var(--fg);border-color:var(--muted)}
+.chip[aria-pressed="true"]{color:var(--bg);border-color:var(--fg);background:var(--fg)}
+.chip small{font-family:var(--mono);font-size:11px;opacity:.7;margin-left:4px}
+
+/* sections */
+main .inner{padding-block:44px 72px;display:flex;flex-direction:column;gap:52px}
+section{display:flex;flex-direction:column;gap:18px}
+.sec-head{display:flex;flex-direction:column;gap:4px;max-width:60ch}
+h2{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:-.015em;margin:0}
+.sec-head p{margin:0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.feat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.feat{grid-template-columns:1fr}}
+
+/* card: every app sets --c, its own color */
+.card{--cc:color-mix(in srgb, var(--c) calc(100% - var(--mixamt)), var(--mix));
+  position:relative;display:flex;flex-direction:column;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;color:inherit;text-decoration:none;overflow:hidden;
+  transition:transform .3s cubic-bezier(.2,.7,.2,1),border-color .3s,box-shadow .3s;animation:rise .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 30ms)}
+.card:hover{transform:translateY(-4px);border-color:color-mix(in srgb, var(--cc) 60%, var(--line));box-shadow:0 22px 44px -30px var(--cc)}
+.card:focus-visible,.chip:focus-visible,.stat:focus-visible,footer a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.art{position:relative;aspect-ratio:2/1;max-width:100%;background:
+  radial-gradient(120% 90% at 85% 0%, color-mix(in srgb, var(--cc) 22%, transparent), transparent 60%),
+  color-mix(in srgb, var(--cc) 7%, var(--surface));border-bottom:1px solid color-mix(in srgb, var(--cc) 18%, var(--line));overflow:hidden}
+.art::after{content:"";position:absolute;inset:0;background-image:radial-gradient(color-mix(in srgb, var(--cc) 22%, transparent) 1px, transparent 1px);background-size:14px 14px;opacity:.55;mask-image:linear-gradient(180deg,#000,transparent 85%);-webkit-mask-image:linear-gradient(180deg,#000,transparent 85%);pointer-events:none}
+.art svg{position:absolute;inset:0;width:100%;height:100%;z-index:1;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.card:hover .art svg{transform:scale(1.035)}
+/* drawing classes used inside each preview */
+.art .s{fill:none;stroke:var(--cc);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.art .t{fill:none;stroke:var(--cc);stroke-width:1.4;stroke-linecap:round;opacity:.45}
+.art .f{fill:var(--cc)}
+.art .fs{fill:var(--cc);opacity:.16}
+.art .fm{fill:var(--cc);opacity:.45}
+.art .p{fill:var(--surface);stroke:color-mix(in srgb, var(--cc) 35%, var(--line));stroke-width:1.2}
+.art .g{fill:var(--muted);opacity:.28}
+.art .gl{fill:none;stroke:var(--muted);stroke-opacity:.3;stroke-width:1.2;stroke-linecap:round}
+.art text{font-family:var(--mono);font-size:10px;fill:var(--cc)}
+.art text.d{font-family:var(--display);font-weight:700}
+
+.body{display:flex;flex-direction:column;gap:10px;padding:18px 20px 20px;flex:1;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+h3{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.015em;margin:0;line-height:1.15}
+.status{flex:none;display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.status i{width:7px;height:7px;border-radius:50%;background:#16a37b}
+.status.limited i{background:#d08a1c}
+.what{margin:0;color:var(--muted);flex:1}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:12px;border-top:1px solid var(--line);min-width:0}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--cc)}
+.go{flex:none;display:inline-flex;align-items:center;gap:6px;font-weight:500;font-size:13px;color:var(--fg)}
+.go svg{transition:transform .3s}
+.card:hover .go svg{transform:translate(3px,-3px)}
+.card.big h3{font-size:24px}
+.card.big .art{aspect-ratio:16/9}
+.card.big .what{color:var(--fg);opacity:.8;font-size:15.5px}
+
+/* card actions */
+button.art{display:block;width:100%;padding:0;border:0;border-bottom:1px solid color-mix(in srgb, var(--cc) 18%, var(--line));cursor:pointer;font:inherit;color:inherit}
+.acts{display:flex;align-items:center;gap:12px;flex:none}
+.more{font:500 13px var(--body);color:var(--fg);background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.more:hover{border-color:var(--cc);color:var(--cc)}
+.go{text-decoration:none}
+.go:hover{color:var(--cc)}
+.more:focus-visible,.go:focus-visible,button.art:focus-visible,.x:focus-visible,.d-open:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.card .tag{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+
+/* details sheet */
+.sheet{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px))}
+.scrim{position:absolute;inset:0;background:color-mix(in srgb, var(--bg) 55%, #000 45%);opacity:0;transition:opacity .22s;backdrop-filter:blur(4px)}
+.panel{--cc:color-mix(in srgb, var(--c) calc(100% - var(--mixamt)), var(--mix));position:relative;width:min(720px,100%);max-height:100%;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 40px 80px -40px rgba(0,0,0,.6);opacity:0;transform:translateY(16px) scale(.98);transition:opacity .22s,transform .3s cubic-bezier(.2,.7,.2,1);outline:none}
+.sheet.on .scrim{opacity:1}
+.sheet.on .panel{opacity:1;transform:none}
+.d-art{position:relative;aspect-ratio:12/5;max-width:100%;background:radial-gradient(120% 90% at 85% 0%, color-mix(in srgb, var(--cc) 24%, transparent), transparent 60%),color-mix(in srgb, var(--cc) 8%, var(--surface));border-bottom:1px solid var(--line)}
+.d-art svg{position:absolute;inset:0;width:100%;height:100%}
+.d-art .s{fill:none;stroke:var(--cc);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.d-art .t{fill:none;stroke:var(--cc);stroke-width:1.4;stroke-linecap:round;opacity:.45}
+.d-art .f{fill:var(--cc)} .d-art .fs{fill:var(--cc);opacity:.16} .d-art .fm{fill:var(--cc);opacity:.45}
+.d-art .p{fill:var(--surface);stroke:color-mix(in srgb, var(--cc) 35%, var(--line));stroke-width:1.2}
+.d-art .g{fill:var(--muted);opacity:.28} .d-art .gl{fill:none;stroke:var(--muted);stroke-opacity:.3;stroke-width:1.2}
+.d-art text{font-family:var(--mono);font-size:10px;fill:var(--cc)} .d-art text.d{font-family:var(--display);font-weight:700}
+.x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:22px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.d-inner{padding:24px;display:flex;flex-direction:column;gap:16px}
+.d-meta{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.d-meta .tag{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--cc)}
+#d-name{font-size:clamp(26px,4vw,34px);letter-spacing:-.02em}
+.d-what{margin:0;color:var(--muted);font-size:16px}
+.d-best{border-radius:12px;padding:14px 16px;background:color-mix(in srgb, var(--cc) 9%, var(--surface));border:1px solid color-mix(in srgb, var(--cc) 25%, var(--line))}
+.d-best span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--cc)}
+.d-best p{margin:4px 0 0;font-family:var(--display);font-weight:500;font-size:18px;line-height:1.35}
+.d-cols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:24px}
+@media (max-width:620px){.d-cols{grid-template-columns:1fr}}
+h4{margin:0 0 8px;font-family:var(--mono);font-weight:500;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.d-cols ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.d-cols li{position:relative;padding-left:20px}
+.d-cols li::before{content:"";position:absolute;left:2px;top:.6em;width:8px;height:8px;border-radius:2px;background:var(--cc);opacity:.8}
+.d-side{display:flex;flex-direction:column;gap:16px}
+.d-side p{margin:0}
+.d-big{font-family:var(--display);font-weight:700;font-size:22px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{font-family:var(--mono);font-size:12px;padding:3px 9px;border-radius:6px;background:var(--soft);border:1px solid var(--line)}
+.d-open{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;background:var(--cc);color:var(--surface);text-decoration:none;font-weight:500}
+.d-open:hover{filter:brightness(1.08)}
+@media (prefers-reduced-motion: reduce){.scrim,.panel{transition:none}}
+
+footer{border-top:1px solid var(--line)}
+footer .inner{padding-block:22px 36px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--muted)}
+footer a{color:var(--accent);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+@keyframes rise{from{opacity:.001;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(22,163,123,.55)}100%{box-shadow:0 0 0 10px rgba(22,163,123,0)}}
+@keyframes blink{50%{opacity:.25}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.art .blink{animation:blink 1.6s steps(2) infinite}
+.art .sweep{transform-origin:62px 60px;animation:spin 6s linear infinite}
+@media (prefers-reduced-motion: reduce){.card,.live,.art .blink,.art .sweep{animation:none}.card,.art svg,.go svg{transition:none}.card:hover{transform:none}.card:hover .art svg{transform:none}}
+</style>
+</head>
+<body>
+
+<header class="hero band">
+  <canvas id="tape" aria-hidden="true"></canvas>
+  <div class="inner">
+    <div class="kicker"><span class="live" aria-hidden="true"></span>Mason Ngo · student developer</div>
+    <h1>Things I've <em>built</em>.</h1>
+    <p class="lede">I build tools for trading, studying and small businesses, mostly because I wanted them to exist. Every card below opens a working app.</p>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<nav class="bar band" aria-label="Filter apps by category"><div class="inner" id="filters"></div></nav>
+
+<main class="band"><div class="inner" id="groups"></div></main>
+
+<footer class="band"><div class="inner"><span>© 2026 Mason Ngo</span><span>Code on <a href="https://github.com/M14Mason">GitHub</a></span></div></footer>
+
+<script>
+const CATS = [
+  {id:"markets",  name:"Markets",  blurb:"Tools I use to research stocks and follow the market."},
+  {id:"learning", name:"Learning", blurb:"Study apps built around how I actually learn: short lessons, practice and spaced review."},
+  {id:"ventures", name:"Ventures", blurb:"Products built to be businesses, from prototype to waitlist."},
+  {id:"tools",    name:"Tools",    blurb:"Everyday utilities for school, training and side hustles."},
+  {id:"creative", name:"Creative", blurb:"My own work outside of code."}
+];
+
+/* Each preview is a 240 x 120 drawing of what the app does. */
+const ART = {
+  meridian:`<rect class="p" x="14" y="12" width="212" height="96" rx="8"/>
+    <rect class="fs" x="14" y="12" width="212" height="16" rx="8"/><circle class="fm" cx="25" cy="20" r="2.5"/><circle class="fm" cx="33" cy="20" r="2.5"/><circle class="fm" cx="41" cy="20" r="2.5"/>
+    <text x="56" y="23">SPX 6,012 ▲0.8%</text><text x="150" y="23" class="blink">● LIVE</text>
+    <g>${[[30,70,52,84],[42,60,46,72],[54,56,40,64],[66,64,50,70],[78,50,36,58],[90,46,40,52],[102,54,44,62],[114,40,30,48],[126,36,28,44]].map(([x,o,h,c],i)=>`<line class="t" x1="${x}" x2="${x}" y1="${h-6}" y2="${c+8}"/><rect class="${i%3==2?'fm':'f'}" x="${x-3.5}" y="${Math.min(o,c)}" width="7" height="${Math.abs(o-c)+4}" rx="1"/>`).join("")}</g>
+    <line class="gl" x1="146" y1="34" x2="146" y2="100"/>
+    <rect class="fs" x="154" y="36" width="64" height="30" rx="5"/><text x="160" y="49">AI ANALYST</text><rect class="g" x="160" y="55" width="48" height="4" rx="2"/>
+    <rect class="g" x="154" y="74" width="64" height="4" rx="2"/><rect class="g" x="154" y="84" width="44" height="4" rx="2"/><rect class="g" x="154" y="94" width="54" height="4" rx="2"/>`,
+  strata:`<rect class="p" x="20" y="14" width="200" height="92" rx="8"/>
+    <rect class="fm" x="30" y="24" width="42" height="12" rx="6"/><rect class="fs" x="76" y="24" width="50" height="12" rx="6"/><rect class="fs" x="130" y="24" width="36" height="12" rx="6"/>
+    <text x="34" y="33" style="fill:var(--surface)">RSI&lt;30</text>
+    ${[0,1,2,3].map(i=>`<g transform="translate(0 ${46+i*14})"><rect class="${i==1||i==2?'fs':'g'}" x="30" y="0" width="180" height="10" rx="3" ${i==1||i==2?'':'style="opacity:.1"'}/><text x="36" y="8">${["AAPL","NVDA","AMD","MSFT"][i]}</text>${i==1||i==2?`<path class="s" d="M196 3l3 3 6-6"/>`:`<rect class="g" x="186" y="3" width="16" height="4" rx="2"/>`}<rect class="g" x="80" y="3" width="${40+i*12}" height="4" rx="2"/></g>`).join("")}`,
+  radar:`<circle class="t" cx="62" cy="60" r="44"/><circle class="t" cx="62" cy="60" r="28"/><circle class="t" cx="62" cy="60" r="12"/>
+    <g class="sweep"><path class="fs" d="M62 60 L62 16 A44 44 0 0 1 100 38 Z"/><line class="s" x1="62" y1="60" x2="62" y2="16"/></g>
+    <circle class="f" cx="84" cy="34" r="3.5"/><circle class="fm" cx="40" cy="78" r="3"/><circle class="fm" cx="78" cy="88" r="2.5"/>
+    <rect class="p" x="124" y="18" width="100" height="84" rx="8"/><text x="132" y="32">NOV</text>
+    ${Array.from({length:20},(_,i)=>{const x=132+(i%5)*18,y=40+Math.floor(i/5)*14;return `<rect class="${[3,11,16].includes(i)?'f':'fs'}" x="${x}" y="${y}" width="13" height="10" rx="2"/>`}).join("")}`,
+  forge:`<rect class="p" x="14" y="14" width="112" height="92" rx="8"/>
+    <text x="22" y="30">sim.py</text>
+    ${[[22,40,62],[30,52,74],[30,64,50],[22,76,82],[30,88,40]].map(([x,y,w],i)=>`<rect class="${i==1?'fm':'g'}" x="${x}" y="${y-4}" width="${w}" height="5" rx="2.5"/>`).join("")}
+    <rect class="f blink" x="74" y="84" width="2" height="9"/>
+    <line class="gl" x1="138" y1="96" x2="228" y2="96"/>
+    ${[ -26,-14,-4,6,18,30 ].map((d,i)=>`<path class="${i==3?'s':'t'}" d="M140 64 C 165 ${64-d*.3}, 190 ${64+d*.6}, 226 ${64-d}"/>`).join("")}
+    <circle class="f" cx="140" cy="64" r="3.5"/><text x="168" y="22">MONTE CARLO</text>`,
+  deca:`<rect class="p" x="70" y="30" width="110" height="68" rx="8" transform="rotate(-8 125 64)"/>
+    <rect class="p" x="66" y="26" width="110" height="68" rx="8" transform="rotate(-3 121 60)"/>
+    <rect class="p" x="62" y="22" width="116" height="72" rx="8"/>
+    <text x="74" y="38">Q 12 / 40</text><rect class="g" x="74" y="46" width="88" height="5" rx="2.5"/><rect class="g" x="74" y="56" width="64" height="5" rx="2.5"/>
+    <rect class="fs" x="74" y="68" width="92" height="16" rx="5"/><path class="s" d="M80 76l4 4 8-8"/><text x="98" y="80">Net present value</text>
+    <circle class="f" cx="196" cy="34" r="12"/><path d="M190 34l4 4 8-8" fill="none" stroke="var(--surface)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`,
+  pace:`<circle class="t" cx="84" cy="62" r="40" style="stroke-width:6;opacity:.18"/>
+    <path class="s" style="stroke-width:6" d="M84 22 A40 40 0 1 1 46 74"/>
+    <rect class="f" x="78" y="10" width="12" height="7" rx="2"/>
+    <text x="64" y="60" class="d" style="font-size:20px">0:42</text><text x="68" y="76">7 x 8 = ?</text>
+    ${[0,1,2,3,4].map(i=>`<rect class="${i<3?'f':'fs'}" x="${146+i*16}" y="${92-[30,44,38,56,62][i]}" width="10" height="${[30,44,38,56,62][i]}" rx="3"/>`).join("")}
+    <text x="146" y="106">SPEED ▲</text>`,
+  keen:`<path class="t" d="M30 96 L210 96"/><path class="t" d="M30 24 L30 96"/>
+    <path class="s" d="M30 30 C 50 70, 60 82, 76 86"/><path class="s" d="M76 40 C 96 66, 110 76, 128 80"/><path class="s" d="M128 46 C 150 62, 170 68, 210 70"/>
+    <circle class="f" cx="76" cy="40" r="4"/><circle class="f" cx="128" cy="46" r="4"/><circle class="f" cx="30" cy="30" r="4"/>
+    <text x="140" y="34">WEAK TOPICS</text><text x="140" y="46">COME BACK</text>
+    <circle class="fm" cx="182" cy="96" r="7"/><circle class="fs" cx="196" cy="96" r="7"/><circle class="f" cx="168" cy="96" r="7"/>`,
+  saleslab:`${Array.from({length:30},(_,i)=>{const h=[8,14,22,30,18,12,26,40,34,20,10,16,30,44,38,24,14,8,18,28,36,22,12,20,32,26,14,10,6,4][i];return `<rect class="${i<18?'f':'fs'}" x="${18+i*5.2}" y="${60-h/2}" width="3" height="${h}" rx="1.5"/>`}).join("")}
+    <circle class="p" cx="196" cy="58" r="28"/><path class="s" d="M176 66 A22 22 0 0 1 216 66" style="stroke-width:4;opacity:.25"/><path class="s" d="M176 66 A22 22 0 0 1 208 48" style="stroke-width:4"/>
+    <text x="186" y="64" class="d" style="font-size:14px">86</text><text x="16" y="104">“SELL ME THIS PEN”</text>`,
+  callwell:`<rect class="p" x="28" y="14" width="56" height="94" rx="12"/><rect class="fs" x="48" y="18" width="16" height="4" rx="2"/>
+    <circle class="f" cx="56" cy="56" r="13"/><path d="M50 53c1 4 4 7 8 8l2.4-2.4c.4-.4 1-.4 1.4-.1l2.6 1.6c.5.3.6 1 .2 1.4l-1.4 1.6c-.8.8-2 1-3 .6-5-2-9-6-11-11-.4-1-.2-2.2.6-3l1.6-1.4c.4-.4 1.1-.3 1.4.2l1.6 2.6c.3.4.3 1-.1 1.4z" fill="var(--surface)"/>
+    <path class="t" d="M76 40 a22 22 0 0 1 0 32"/><path class="t" d="M84 32 a32 32 0 0 1 0 48"/>
+    <text x="38" y="94">00:48</text>
+    <rect class="p" x="112" y="24" width="108" height="34" rx="8"/><text x="120" y="38">AI: Booked Tue 9 AM</text><rect class="g" x="120" y="44" width="72" height="4" rx="2"/>
+    <rect class="fs" x="112" y="66" width="108" height="30" rx="8"/><path class="s" d="M122 81l4 4 8-8"/><text x="140" y="85">Text sent</text>`,
+  folio:`<rect class="p" x="22" y="12" width="196" height="96" rx="8"/><rect class="fs" x="22" y="12" width="196" height="14" rx="8"/>
+    <rect class="g" x="80" y="17" width="80" height="4" rx="2"/>
+    <rect class="fm" x="32" y="34" width="54" height="40" rx="4"/><rect class="fs" x="32" y="78" width="54" height="22" rx="4"/>
+    <rect class="fs" x="92" y="34" width="56" height="24" rx="4"/><rect class="f" x="92" y="62" width="56" height="38" rx="4"/>
+    <rect class="fm" x="154" y="34" width="54" height="46" rx="4"/><rect class="fs" x="154" y="84" width="54" height="16" rx="4"/>
+    <circle cx="206" cy="22" r="9" class="f"/><path d="M202 22a4 4 0 0 1 7-2.6M210 22a4 4 0 0 1-7 2.6" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/>`,
+  shutter:`<circle class="p" cx="80" cy="60" r="42"/>
+    ${Array.from({length:6},(_,i)=>`<path class="${i%2?'fm':'f'}" transform="rotate(${i*60} 80 60)" d="M80 60 L80 22 A38 38 0 0 1 112 41 Z" opacity="${.35+i*.1}"/>`).join("")}
+    <circle cx="80" cy="60" r="12" fill="var(--surface)"/>
+    <text x="140" y="48" class="d" style="font-size:28px">2:00</text><text x="142" y="66">TO POST</text>
+    <rect class="fs" x="140" y="76" width="74" height="18" rx="9"/><text x="150" y="88" class="blink">● NOW</text>`,
+  launchpad:`<rect class="p" x="22" y="14" width="88" height="94" rx="6"/>
+    <circle class="fm" cx="38" cy="30" r="7"/><rect class="g" x="50" y="26" width="48" height="5" rx="2.5"/>
+    ${[46,58,70,82,94].map((y,i)=>`<rect class="${i==0?'fm':'g'}" x="32" y="${y}" width="${[66,58,62,48,54][i]}" height="4" rx="2"/>`).join("")}
+    <path class="t" style="stroke-dasharray:4 5" d="M128 98 C 150 92, 176 70, 200 30"/>
+    <g transform="translate(200 28) rotate(35)"><path class="f" d="M0 -14 C 6 -8, 6 6, 4 10 L -4 10 C -6 6, -6 -8, 0 -14 Z"/><path class="fm" d="M-4 4 L-10 12 L-4 10 Z M4 4 L10 12 L4 10 Z"/></g>
+    <circle class="fs" cx="140" cy="92" r="6"/><circle class="fs" cx="168" cy="72" r="5"/>`,
+  cue:`<rect class="p" x="22" y="12" width="196" height="96" rx="8"/>
+    <rect class="g" x="40" y="24" width="140" height="5" rx="2.5" style="opacity:.14"/><rect class="g" x="40" y="36" width="160" height="5" rx="2.5" style="opacity:.2"/>
+    <rect class="fs" x="30" y="48" width="180" height="20" rx="5"/><text x="40" y="62" class="d" style="font-size:12px">and that's why we built it</text>
+    <rect class="g" x="40" y="76" width="150" height="5" rx="2.5"/><rect class="g" x="40" y="88" width="120" height="5" rx="2.5"/>
+    <path class="f" d="M24 58 l-6 -5 v10 z"/>
+    <g transform="translate(196 92)"><rect class="f" x="-4" y="-10" width="8" height="12" rx="4"/><path class="s" style="stroke-width:1.6" d="M-7 -2 a7 7 0 0 0 14 0 M0 5 v3"/></g>`,
+  thrift:`<path class="s" d="M24 30 v-10 h10 M206 20 h10 v10 M216 90 v10 h-10 M34 100 h-10 v-10"/>
+    <path class="fm" d="M70 34 h44 l16 12 v44 h-60 z"/><path class="fs" d="M84 34 c0 10 16 10 16 0"/>
+    <g transform="translate(150 40) rotate(12)"><path class="f" d="M0 0 h48 l14 16 l-14 16 h-48 z"/><circle cx="10" cy="16" r="3.5" fill="var(--surface)"/><text x="18" y="21" style="fill:var(--surface);font-size:12px" class="d">$48</text></g>
+    <text x="150" y="98">PROFIT +$36</text>`,
+  spar:`<rect class="p" x="18" y="12" width="204" height="96" rx="8"/>
+    <g class="s" style="stroke-width:2.4"><circle cx="86" cy="34" r="8"/><path d="M86 42 L84 70 L72 98 M84 70 L98 96 M86 50 L110 44 L132 40 M86 50 L70 60 L76 46"/></g>
+    <circle class="f" cx="132" cy="40" r="5"/><circle class="t" cx="132" cy="40" r="11"/>
+    <rect class="fs" x="150" y="22" width="62" height="40" rx="5"/><text x="156" y="36">JAB  12</text><text x="156" y="50">CROSS 7</text>
+    <rect class="g" x="26" y="98" width="188" height="3" rx="1.5"/><rect class="f" x="26" y="98" width="86" height="3" rx="1.5"/>`,
+  titan:`${Array.from({length:35},(_,i)=>{const v=[3,2,0,3,1,2,3,1,3,2,3,0,2,3,3,1,2,3,3,2,1,3,3,0,2,3,3,2,3,3,1,3,3,2,3][i];return `<rect x="${24+(i%7)*15}" y="${18+Math.floor(i/7)*15}" width="11" height="11" rx="2.5" class="${v==0?'fs':v==1?'fs':v==2?'fm':'f'}" ${v==0?'style="opacity:.06"':''}/>`}).join("")}
+    <circle class="t" cx="180" cy="60" r="34" style="stroke-width:7;opacity:.16"/><path class="s" style="stroke-width:7" d="M180 26 A34 34 0 1 1 147 68"/>
+    <circle class="t" cx="180" cy="60" r="22" style="stroke-width:6;opacity:.16"/><path class="s" style="stroke-width:6;opacity:.6" d="M180 38 A22 22 0 0 1 200 70"/>
+    <text x="166" y="64" class="d" style="font-size:13px">82%</text>`,
+  photo:`<rect class="p" x="40" y="10" width="160" height="100" rx="6"/>
+    <rect class="fs" x="50" y="20" width="140" height="80" rx="3"/>
+    <circle class="fm" cx="160" cy="40" r="9"/>
+    <path class="fm" d="M50 100 L92 54 L118 80 L140 62 L190 100 Z"/><path class="f" d="M50 100 L92 54 L108 72 L80 100 Z"/>
+    <path class="s" style="stroke-width:1.6" d="M70 34 q4 -4 8 0 q4 -4 8 0"/>
+    <path class="t" d="M36 22 v-16 h16 M188 6 h16 v16 M204 98 v16 h-16 M52 114 h-16 v-16"/>`
+};
+
+const APPS = [
+  {name:"Meridian Terminal", art:"meridian", c:"#0f8a6a", cat:"markets", tag:"Market terminal", url:"https://m14mason.github.io/Meridian-Download/", status:"Invite only", feat:true, started:"Oct 2026",
+   what:"A Bloomberg-style market terminal with live charts and an AI analyst.",
+   best:"A full desktop terminal with installers and built-in updates, built for my own research.",
+   features:["Live market charts","Built-in AI analyst","View only: no trading, so nothing can go wrong","Desktop installers for Windows and Linux","Tells you when a new version is out and updates in one click"],
+   stack:["TypeScript","Desktop app","Claude API"]},
+  {name:"Forge", art:"forge", c:"#d0571f", cat:"learning", tag:"Learn to code", url:"https://m14mason.github.io/forge/", feat:true, started:"Nov 2026",
+   what:"Teaches Python by having you build real finance projects, starting with a Monte Carlo sim.",
+   best:"You write the code yourself. The AI tutor coaches you instead of doing it for you.",
+   features:["Lessons that build toward real finance projects","Projects like a Monte Carlo portfolio simulator, a savings goal calculator and a strategy backtest","Live AI tutor panel for when you're stuck","Pairs with the Python for Everybody course"],
+   stack:["HTML","JavaScript","Claude API"]},
+  {name:"Callwell", art:"callwell", c:"#2b55d6", cat:"ventures", tag:"AI receptionist", url:"https://m14mason.github.io/Callwell/", feat:true, started:"Oct 2026",
+   what:"An AI phone receptionist that answers calls and books jobs for home service businesses.",
+   best:"It books the appointment while the customer is still on the line, then texts both sides.",
+   features:["Answers 24/7: nights, weekends and holidays","Checks the real calendar and books open slots during the call","Texts the customer a confirmation and the owner a call summary","Works with the business's existing phone number","Built for 10 trades, from HVAC and plumbing to pool service"],
+   stack:["HTML","CSS","JavaScript","Three.js"]},
+  {name:"Strata", art:"strata", c:"#0b7fa8", cat:"markets", tag:"Stock screener", url:"https://strata-screener.fly.dev/", started:"Sep 2026",
+   what:"Scans the U.S. market with a no-code strategy builder and shows why each stock matched.",
+   best:"Runs on real end-of-day data for 3,171 U.S. listings, rebuilt every night.",
+   features:["Technical and fundamental filters across the whole U.S. market","Build and save screening strategies without writing code","Shows exactly which rules each stock passed","320 trading sessions of history per stock","52 engine tests, with indicators cross-checked against real data"],
+   stack:["TypeScript","Next.js","Fly.io"]},
+  {name:"Stock Radar", art:"radar", c:"#5a8f1d", cat:"markets", tag:"Catalyst calendar", url:"https://m14mason.github.io/stock-radar/", started:"Sep 2026",
+   what:"An economic calendar plus earnings, FDA dates and news for individual stocks.",
+   best:"Every stock gets a bullish or bearish score, upside, downside and reward to risk.",
+   features:["Upcoming earnings and FDA meetings within 45 days","Bull or bear score from analyst ratings, headlines and trend","Suggested entry and exit dates around each event","Calendar for Fed, CPI, jobs, GDP and more","Data refreshes every 30 minutes on weekdays, with a Debug tab"],
+   stack:["Python","GitHub Actions","GitHub Pages"]},
+  {name:"DECA Finance Review", art:"deca", c:"#1f5fb8", cat:"learning", tag:"Test prep", url:"https://m14mason.github.io/deca-review/", started:"Nov 2026",
+   what:"Short lessons, quizzes and flashcards for DECA finance events.",
+   best:"Watch a short animated lesson, then get quizzed on it right away.",
+   features:["Animated lessons, one idea at a time","Quizzes right after each lesson","Full practice tests","Spaced retrieval so weak topics come back","Progress sync"],
+   stack:["HTML","JavaScript"]},
+  {name:"Pace", art:"pace", c:"#c43c3c", cat:"learning", tag:"Speed drills", url:"https://m14mason.github.io/pace/", started:"Oct 2026",
+   what:"Timed drills for math speed, finance and AP prep.",
+   best:"13 math skills with 8 levels each, every one with its own speed target.",
+   features:["Daily guided session with adaptive difficulty","Instant “here's how” feedback and hints","Finance tab with fundamentals, advanced, capstone and DECA","Course units for upcoming AP classes","AI grading and phone reminders"],
+   stack:["JavaScript","Claude API","PWA"]},
+  {name:"Keen", art:"keen", c:"#7a4fd0", cat:"learning", tag:"Adaptive study", url:"https://keenlearning.org/", started:"Aug 2026",
+   what:"Tracks every question you miss and keeps sending weak topics back until they stick.",
+   best:"Study group leaderboards rank improvement, not who was already ahead.",
+   features:["Finds which topics are actually weak from your misses","Study groups start at 3 people","Paid plans for solo learners and study groups","Zero npm dependencies","Over 130 automated tests"],
+   stack:["Node.js","SQLite","Stripe"]},
+  {name:"SalesLab", art:"saleslab", c:"#b8860b", cat:"learning", tag:"Sales practice", url:"https://m14mason.github.io/saleslab/", started:"Oct 2026",
+   what:"Pitch an AI buyer out loud and get a score and coaching on every call.",
+   best:"Includes a “sell me this pen” challenge against a tough AI buyer called the Wolf.",
+   features:["32 scenarios across 22 types, from real estate to investor pitches","Easy, medium and hard buyers that act differently","Report with 12 skill scores and “say this instead” lines","Live tips, talk ratio and filler word count","Daily challenge, streaks and a skill radar"],
+   stack:["TypeScript","Vite","Claude API"]},
+  {name:"Folio", art:"folio", c:"#b0418a", cat:"ventures", tag:"Artist sites", url:"https://m14mason.github.io/folio-prototype/", status:"Prototype", started:"Oct 2026",
+   what:"Portfolio sites for artists that update themselves from their folders.",
+   best:"Drop work into a folder and it shows up on your site, no upkeep.",
+   features:["Your folders become your site","Captions from your photo data, never made up","Five very different site styles","Made for photography, illustration, design, film and music"],
+   stack:["TypeScript","Cloudflare Workers"]},
+  {name:"Shutter", art:"shutter", c:"#e0563b", cat:"ventures", tag:"Photo app", url:"https://shutter-dd3.pages.dev/", status:"Waitlist", started:"Oct 2026",
+   what:"Everyone gets the same random two-minute window each day to post a photo.",
+   best:"One random moment a day, so everyone posts at the same second.",
+   features:["Same random two-minute window for everyone","Built for high schoolers, 16 and up","Waitlist is open now"],
+   stack:["HTML","Cloudflare Pages"]},
+  {name:"Launchpad", art:"launchpad", c:"#3a6fd8", cat:"tools", tag:"Career tools", url:"https://m14mason.github.io/launchpad/", started:"Sep 2026",
+   what:"Finds internships and colleges and builds resumes only from verified info.",
+   best:"Every chance estimate starts from a real published acceptance rate.",
+   features:["140 real internship programs with deadlines and eligibility","42 colleges with real admit rates","Resume studio with ATS and recruiter scores","180+ lessons across finance, trading and career skills","Spoken interview and pitch practice"],
+   stack:["JavaScript","PWA","Claude API"]},
+  {name:"Cue", art:"cue", c:"#0e9488", cat:"tools", tag:"Teleprompter", url:"https://m14mason.github.io/cue/", started:"Oct 2026",
+   what:"A free teleprompter that scrolls by following your voice.",
+   best:"Can run speech recognition on your own device, fully offline.",
+   features:["Follows your voice, even with misheard words","Holds when you go off script and marks skipped lines","Desktop app for Mac and Windows that floats under your webcam","Control it from your phone with a QR code","Live pace, time left and a summary after each run"],
+   stack:["JavaScript","Whisper","Desktop app"]},
+  {name:"Thrift Scout", art:"thrift", c:"#2f8f4e", cat:"tools", tag:"Resale finder", url:"https://m14mason.github.io/thrift-scout/", started:"Aug 2026",
+   what:"Snap a thrift find and see what it resells for and your profit.",
+   best:"Gives a Great Buy, Decent Flip or Pass verdict from up to 3 photos.",
+   features:["AI identifies the brand and model from photos","Resale range and profit after platform fees","Estimated days to sell","Map of 50+ SoCal thrift stores you can stamp as visited"],
+   stack:["HTML","Claude vision","Leaflet"]},
+  {name:"SparAnalyzer", art:"spar", c:"#c2410c", cat:"tools", tag:"Fight analysis", url:"https://m14mason.github.io/sparanalyzer/", started:"Jul 2026",
+   what:"Breaks down sparring footage: strikes thrown, guard and fighter stats.",
+   best:"Measures hand speed in meters per second straight from video.",
+   features:["Strike log and strikes by type for both fighters","Rounds detected automatically from rest gaps","Guard discipline and work rate every 30 seconds","Coach's corner with exactly what to fix","Progress tracker saved on your device"],
+   stack:["HTML","JavaScript","Pose tracking"]},
+  {name:"Titan", art:"titan", c:"#4f46e5", cat:"tools", tag:"Training system", url:"https://m14mason.github.io/titan/", started:"Aug 2026",
+   what:"Tracks habits, goals, fuel and training in one place.",
+   best:"A sparring film lab that detects and scores strikes with pose tracking.",
+   features:["Habits, streaks and goals with a pacing bar","Round timer, combo generator and personal records","Calories, protein and water with barcode scanning","Coach with drills, debriefs and game plans","Works offline, data stays on your phone"],
+   stack:["HTML","MediaPipe","PWA"]},
+  {name:"Photography", art:"photo", c:"#9a6b2f", cat:"creative", tag:"Photo portfolio", url:"https://m14mason.github.io/portfolio-site/", started:"Oct 2026",
+   what:"My photos: wildlife, aviation and public life.",
+   best:"Each series gets its own gallery, plus my awards and exhibitions.",
+   features:["Galleries for wildlife, aviation and public life","Awards and exhibitions section","A separate gallery for each series"],
+   stack:["HTML","CSS","JavaScript"]}
+];
+
+const $ = s => document.querySelector(s);
+const catName = id => CATS.find(c => c.id === id).name;
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const arrow = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9L9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+function card(a, i, big){
+  const limited = !!a.status, idx = APPS.indexOf(a);
+  return `<article class="card${big?" big":""}" style="--c:${a.c};--i:${i}">
+    <button type="button" class="art" data-more="${idx}" aria-label="More about ${esc(a.name)}"><svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${ART[a.art]}</svg></button>
+    <div class="body">
+      <div class="top"><h3>${esc(a.name)}</h3><span class="status${limited?" limited":""}"><i></i>${limited?a.status:"Live"}</span></div>
+      <p class="what">${esc(a.what)}</p>
+      <div class="foot"><span class="tag">${a.tag} · ${a.started}</span>
+        <span class="acts"><button type="button" class="more" data-more="${idx}">See more</button><a class="go" href="${a.url}" target="_blank" rel="noopener">${a.status==="Waitlist" ? "Join" : "Open"} ${arrow}</a></span></div>
+    </div>
+  </article>`;
+}
+
+/* details panel */
+const sheet = document.createElement("div");
+sheet.className = "sheet"; sheet.hidden = true;
+sheet.innerHTML = `<div class="scrim" data-close></div><div class="panel" role="dialog" aria-modal="true" aria-labelledby="d-name" tabindex="-1"><div id="d-body"></div></div>`;
+document.body.appendChild(sheet);
+let lastFocus = null;
+function openDetails(idx){
+  const a = APPS[idx]; lastFocus = document.activeElement;
+  const limited = !!a.status;
+  sheet.querySelector(".panel").style.setProperty("--c", a.c);
+  $("#d-body").innerHTML = `
+    <div class="d-art"><svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${ART[a.art]}</svg>
+      <button type="button" class="x" data-close aria-label="Close">×</button></div>
+    <div class="d-inner">
+      <div class="d-meta"><span class="tag">${a.tag}</span><span class="status${limited?" limited":""}"><i></i>${limited?a.status:"Live"}</span></div>
+      <h3 id="d-name">${esc(a.name)}</h3>
+      <p class="d-what">${esc(a.what)}</p>
+      <div class="d-best"><span>Standout feature</span><p>${esc(a.best)}</p></div>
+      <div class="d-cols">
+        <div><h4>What it can do</h4><ul>${a.features.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+        <div class="d-side">
+          <div><h4>Started</h4><p class="d-big">${a.started}</p></div>
+          <div><h4>Category</h4><p>${catName(a.cat)}</p></div>
+          <div><h4>Built with</h4><div class="chips">${a.stack.map(x=>`<span>${esc(x)}</span>`).join("")}</div></div>
+        </div>
+      </div>
+      <a class="d-open" href="${a.url}" target="_blank" rel="noopener">${a.status==="Waitlist" ? "Join the waitlist" : "Open " + esc(a.name)} ${arrow}</a>
+    </div>`;
+  sheet.hidden = false; document.documentElement.style.overflow = "hidden";
+  requestAnimationFrame(() => sheet.classList.add("on"));
+  sheet.querySelector(".panel").focus();
+}
+function closeDetails(){
+  sheet.classList.remove("on"); document.documentElement.style.overflow = "";
+  setTimeout(() => { sheet.hidden = true; }, 220);
+  if(lastFocus) lastFocus.focus();
+}
+document.addEventListener("click", e => {
+  const m = e.target.closest("[data-more]"); if(m){ openDetails(+m.dataset.more); return; }
+  if(e.target.closest("[data-close]")) closeDetails();
+});
+document.addEventListener("keydown", e => { if(e.key === "Escape" && !sheet.hidden) closeDetails(); });
+
+const live = APPS.filter(a => !a.status).length;
+$("#stats").innerHTML =
+  `<div class="stat"><b>${APPS.length}</b><span>Apps</span></div>
+   <div class="stat"><b>${live}</b><span>Live now</span></div>
+   <div class="stat"><b>Jul 2026</b><span>First ship</span></div>
+   <a class="stat" href="https://github.com/M14Mason"><b>GitHub ↗</b><span>M14Mason</span></a>`;
+
+let active = "all";
+function render(){
+  let i = 0, html = "";
+  if(active === "all"){
+    html += `<section aria-labelledby="h-feat"><div class="sec-head"><h2 id="h-feat">Start here</h2><p>The three I'm proudest of.</p></div><div class="feat">` +
+      APPS.filter(a => a.feat).map(a => card(a, i++, true)).join("") + `</div></section>`;
+  }
+  html += CATS.filter(c => active === "all" || c.id === active).map(c => {
+    const list = APPS.filter(a => a.cat === c.id && (active !== "all" || !a.feat));
+    if(!list.length) return "";
+    return `<section aria-labelledby="h-${c.id}"><div class="sec-head"><h2 id="h-${c.id}">${c.name}</h2><p>${c.blurb}</p></div><div class="grid">` +
+      list.map(a => card(a, i++, false)).join("") + `</div></section>`;
+  }).join("");
+  $("#groups").innerHTML = html;
+}
+const f = $("#filters");
+f.innerHTML = [{id:"all",name:"All"}, ...CATS].map(c => {
+  const n = c.id==="all" ? APPS.length : APPS.filter(a=>a.cat===c.id).length;
+  return `<button type="button" class="chip" id="f-${c.id}" data-id="${c.id}" aria-pressed="${c.id==="all"}">${c.name}<small>${n}</small></button>`;
+}).join("");
+f.addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  active = b.dataset.id;
+  f.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+});
+render();
+
+// hero: a slow price line drawn behind the headline
+(function(){
+  const cv = $("#tape"), ctx = cv.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let w, h, pts = [], t = 0, raf;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  function size(){
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = cv.clientWidth; h = cv.clientHeight;
+    cv.width = w*dpr; cv.height = h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    pts = []; let v = h*.62, s = 7;
+    for(let x=0; x<=w+20; x+=6){ s = (s*9301+49297)%233280; v += (s/233280 - .5)*14 - (v - h*.55)*.02; pts.push(v); }
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle = css("--line"); ctx.lineWidth = 1; ctx.globalAlpha = .6;
+    for(let y=h*.2; y<h; y+=h*.2){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    const n = reduce ? pts.length : Math.min(pts.length, Math.floor(t));
+    const c = css("--accent");
+    ctx.globalAlpha = .45; ctx.strokeStyle = c; ctx.lineWidth = 1.6; ctx.beginPath();
+    for(let i=0;i<n;i++){ const x=i*6, y=pts[i] + (reduce?0:Math.sin((i+t)*.04)*2); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+    ctx.stroke();
+    if(n>1){ ctx.globalAlpha=1; ctx.fillStyle=c; ctx.beginPath(); ctx.arc((n-1)*6,pts[n-1],3,0,Math.PI*2); ctx.fill(); }
+    ctx.globalAlpha = 1;
+    if(!reduce){ t += t < pts.length ? 2.2 : .35; raf = requestAnimationFrame(draw); }
+  }
+  size(); draw();
+  let to; addEventListener("resize", () => { clearTimeout(to); to = setTimeout(() => { cancelAnimationFrame(raf); size(); t = pts.length; draw(); }, 150); });
+  document.addEventListener("visibilitychange", () => { cancelAnimationFrame(raf); if(!document.hidden && !reduce) draw(); });
+})();
+</script>
+</body>
+</html>
